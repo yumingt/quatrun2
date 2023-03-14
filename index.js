@@ -37618,12 +37618,12 @@ var t;const i=window,s=i.trustedTypes,e=s?s.createPolicy("lit-html",{createHTML:
 
 // Initialize Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyClwzQigSQ8LfdjBg7u_eG_gGdOkP1gqmw",
-  authDomain: "quatrun-6d711.firebaseapp.com",
-  projectId: "quatrun-6d711",
-  storageBucket: "quatrun-6d711.appspot.com",
-  messagingSenderId: "679167722805",
-  appId: "1:679167722805:web:5dfc047bd1ed428974787c"
+  apiKey: "AIzaSyDsBBXVykrCwOxpjnmYCHW4bwlQR_OggLw",
+  authDomain: "quatrun2.firebaseapp.com",
+  projectId: "quatrun2",
+  storageBucket: "quatrun2.appspot.com",
+  messagingSenderId: "766084007913",
+  appId: "1:766084007913:web:3280d700baf5b35bbded78"
 };
 firebase.initializeApp(firebaseConfig);
 

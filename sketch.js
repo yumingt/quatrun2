@@ -5,13 +5,14 @@ var die; //some data coming in over serial! (right button)
 
 let player; // variable for player
 let blobs = []; // array for obstacles
+let gameStart = false;
 let score = 0; // score counter
 let highScore = 0;
 let minScore = 0; // minimum score counter
 
 let playerSprite; // sprite of player
 let obstacleSprite; // sprite of obstacle
-var ground, gameOverImg; // variable for ground and game over sprites
+var ground, gameOverImg, playBtnImg, replayImg; // variable for ground and game over sprites
 
 function preload() {
   playerSprite = loadImage("images/box_cat.PNG"); // load player image onto player sprite
@@ -19,6 +20,8 @@ function preload() {
   backImage = loadImage("images/background.PNG"); // load background image onto background
   groundImage = loadImage("images/ground.PNG"); // load ground image onto ground sprite
   gameOverImg = loadImage("images/game_over.png") // load game over image onto game over sprite
+  playBtnImg = loadImage("images/play_button.PNG"); // load play button image
+  replayImg = loadImage("images/replay.png"); // load replay image
 }
 
 function setup() {
@@ -47,8 +50,14 @@ function setup() {
   player = new Player(210, 236, 1920, 800, playerSprite);
   ground = createSprite(width, 54, width, 40);
   ground.addImage(groundImage);
-  gameOver = createSprite(300,120, 193, 200);
+  gameOver = createSprite(width/2, 120, 193, 200);
   gameOver.addImage(gameOverImg);
+  playBtn = createSprite(width/2, height/2, 1920, 800);
+  playBtn.addImage(playBtnImg);
+  playBtn.scale = 0.3;
+  replayBtn = createSprite(width/2, 180, 193, 200);
+  replayBtn.addImage(replayImg);
+  replayBtn.scale = 0.04;
 }
 
 // get the list of ports:
@@ -106,13 +115,30 @@ function draw() {
   serial.write(score);
   background(backImage); // set backgound image
   gameOver.visible = false; // make game over sprite invisible
+  replayBtn.visible = false;
 
+  if (mouseX > width/2-85 && mouseX < width/2+85 && mouseY < height/2+30 && mouseY > height/2-30) {
+    if (mouseIsPressed) {
+      playBtn.visible = false;
+      gameStart = true;
+      startGame();
+    }
+  }
+
+  if (gameStart) {
+    startGame();
+  }
+  drawSprites(); // displays sprites
+}
+
+function startGame() {
   if (jump == 1) {
     player.jump(); // makes player jump if left button or space key is pressed
   }
 
   if (die == 1) {
     gameOver.visible = true; // makes game over sprite visible if right button is pressed
+    replayBtn.visible = true;
     noLoop(); // ends game if right button is pressed
   }
 
@@ -144,6 +170,7 @@ function draw() {
         // window.top.post message "How to communicate between iframe and parent"
       }
       gameOver.visible = true; // makes the gave over sprite visible
+      replayBtn.visible = true;
       noLoop(); // ends the game
     }
 
@@ -152,8 +179,6 @@ function draw() {
       print("Removed"); // prints "removed"
     }
   }
-
-  drawSprites(); // displays sprites
 }
 
 // function saveHighScore(userId, score) {

@@ -51,7 +51,8 @@ async function loginGoogle() {
   try {
     await firebase.auth().signInWithPopup(provider);
     console.log("Google signin");
-    render(gameView(), pageContainer)
+    render(gameView(), pageContainer);
+    getAllScores();
     //query for scores that exist, reference messaging example (getAllMessages)
     //rerender game view
   } catch (error) {
@@ -62,8 +63,18 @@ async function loginGoogle() {
 async function loginAnon() {
   firebase.auth().signInAnonymously();
   console.log("Anon signin");
-  document.location.href = 'http://yumingt.github.io/hcde438mp3';
+  render(gameView(), pageContainer);
 }
 
 render(loginView(), pageContainer)
 
+async function getAllScores() {
+  const querySnapshot = await getDocs(
+    query(messagesRef, orderBy("score", "desc"))
+  );
+  querySnapshot.forEach((doc) => {
+    let scoreData = doc.data();
+    scores.push(scoreData);
+  });
+  render(gameView(), pageContainer);
+}

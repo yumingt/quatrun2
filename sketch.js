@@ -2,6 +2,10 @@ var serial; // variable to hold an instance of the serialport library
 var portName = 'COM3'; //rename to the name of your port
 var jump; //some data coming in over serial! (left button)
 var die; //some data coming in over serial! (right button)
+var START = 0;
+var PLAY = 1;
+var END = 2;
+var gameState = START; // three game states: START, PLAY, END
 
 let player; // variable for player
 let blobs = []; // array for obstacles
@@ -11,7 +15,7 @@ let minScore = 0; // minimum score counter
 
 let playerSprite; // sprite of player
 let obstacleSprite; // sprite of obstacle
-var ground, gameOverImg; // variable for ground and game over sprites
+var ground, gameOverImg, playBtnImg, replayImg; // variable for ground and game over sprites
 
 function preload() {
   playerSprite = loadImage("images/box_cat.PNG"); // load player image onto player sprite
@@ -19,6 +23,8 @@ function preload() {
   backImage = loadImage("images/background.PNG"); // load background image onto background
   groundImage = loadImage("images/ground.PNG"); // load ground image onto ground sprite
   gameOverImg = loadImage("images/game_over.png") // load game over image onto game over sprite
+  playBtnImg = loadImage("images/play_button.PNG"); // load play button image
+  replayImg = loadImage("images/replay.png"); // load replay image
 }
 
 function setup() {
@@ -47,8 +53,14 @@ function setup() {
   player = new Player(210, 236, 1920, 800, playerSprite);
   ground = createSprite(width, 54, width, 40);
   ground.addImage(groundImage);
-  gameOver = createSprite(300,120, 193, 200);
+  gameOver = createSprite(width/2, 120, 193, 200);
   gameOver.addImage(gameOverImg);
+  playBtn = createSprite(width/2, height/2, 1920, 800);
+  playBtn.addImage(playBtnImg);
+  playBtn.scale = 0.3;
+  replayBtn = createSprite(width/2, 180, 193, 200);
+  replayBtn.addImage(replayImg);
+  replayBtn.scale = 0.04;
 }
 
 // get the list of ports:
@@ -102,25 +114,56 @@ function keyPressed() {
 }
 
 function draw() {
-
   serial.write(score);
   background(backImage); // set backgound image
-  gameOver.visible = false; // make game over sprite invisible
+  fill(255, 255, 255); // sets score text to be white
+  textSize(30); // sets size of score text
+  text(round(score), 10, 32); // sets style of score text
 
+  if (gameState === START) {
+    gameOver.visible = false; // make game over sprite invisible
+    replayBtn.visible = false;
+    textSize(14); // sets size of score text
+    text("Keyboard controls: Press space to jump", width/2-205, height/2+60)
+    text("Handheld controller: Press left button to jump and right button to end game", width/2-205, height/2+90)
+    if (mouseX > width/2-85 && mouseX < width/2+85 && mouseY < height/2+30 && mouseY > height/2-30) {
+      if (mouseIsPressed) {
+        playBtn.visible = false;
+        gameState = PLAY;
+        playGame();
+      }
+    }
+  } else if (gameState === PLAY) {
+    playGame();
+  } else if (gameState === END) {
+    if (mouseX > width/2-18 && mouseX < width/2+18 && mouseY < height/2+60 && mouseY > height/2-10) {
+      if (mouseIsPressed) {
+        gameOver.visible = false; // make game over sprite invisible
+        replayBtn.visible = false;
+        for (var blob of blobs) {
+          blob.sprite.visible = false;
+        }
+        blobs = [];
+        score = 0;
+        gameState = PLAY;
+        //playGame();
+      }
+    }
+  }
+
+  drawSprites(); // displays sprites
+}
+
+function playGame() {
   if (jump == 1) {
     player.jump(); // makes player jump if left button or space key is pressed
   }
 
   if (die == 1) {
-    gameOver.visible = true; // makes game over sprite visible if right button is pressed
-    noLoop(); // ends game if right button is pressed
+    endGame();
   }
 
   score += 0.05; // increments score
-  fill(255, 255, 255); // sets score text to be white
-
-  textSize(30); // sets size of score text
-  text(round(score), 10, 32); // sets style of score text
 
   player.show(); // calls show function in player class
   player.move(); // calls move function in player class
@@ -143,8 +186,7 @@ function draw() {
         serial.write(highScore);
         // window.top.post message "How to communicate between iframe and parent"
       }
-      gameOver.visible = true; // makes the gave over sprite visible
-      noLoop(); // ends the game
+      endGame();
     }
 
     if (blob.getX() < -50) { // if obstacle is goes off of the screen
@@ -152,8 +194,13 @@ function draw() {
       print("Removed"); // prints "removed"
     }
   }
+}
 
-  drawSprites(); // displays sprites
+function endGame() {
+  gameState = END;
+  gameOver.visible = true; // makes game over sprite visible if right button is pressed
+  replayBtn.visible = true;
+  //noLoop(); // ends game if right button is pressed
 }
 
 // function saveHighScore(userId, score) {

@@ -17,6 +17,11 @@ let playerSprite; // sprite of player
 let obstacleSprite; // sprite of obstacle
 var ground, gameOverImg, playBtnImg, replayImg; // variable for ground and game over sprites
 
+const scoreData = {
+  name: "player",
+  score: score
+};
+
 function preload() {
   playerSprite = loadImage("images/box_cat.PNG"); // load player image onto player sprite
   obstacleSprite = loadImage("images/1pot.PNG"); // load obstacle image onto obstacle sprite
@@ -184,6 +189,7 @@ function playGame() {
       if (score > highScore) {
         highScore = score;
         serial.write(highScore);
+        window.top.postMessage({ type: 'scoreSubmitted', score }, '*');
         // window.top.post message "How to communicate between iframe and parent"
       }
       endGame();

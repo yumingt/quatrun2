@@ -37652,9 +37652,16 @@ const loginView = () => {
 </div>`
 };
 
+// const gameView = () => {
+//   return html`
+//   <iframe src="sketch.html"></iframe>`
+// }
+
 const gameView = () => {
+  renderLeaderboard();
   return y`
-  <iframe src="sketch.html"></iframe>`
+    <iframe id="game-iframe" src="sketch.html"></iframe>
+  `;
 };
 
 //<div id="score-container">${scores.map}</div>
@@ -37691,5 +37698,64 @@ async function getAllScores() {
   });
   Z(gameView(), pageContainer);
 }
+
+async function renderLeaderboard() {
+  const querySnapshot = await db.collection('scores').orderBy('score', 'desc').limit(5).get();
+  const leaderboard = [];
+  querySnapshot.forEach(doc => {
+    leaderboard.push(doc.data());
+  });
+  Z(renderLeaderboardUI(leaderboard), document.getElementById("leaderboard-container"));
+}
+
+function renderLeaderboardUI(leaderboard) {
+  return y`
+    <div id="leaderboard">
+      <h2>Leaderboard</h2>
+      <ol>
+        ${leaderboard.map(score => y`<li>${score.name}: ${score.score}</li>`)}
+      </ol>
+    </div>
+  `;
+}
+
+// window.addEventListener('message', event => {
+//   if (event.data.type === 'scoreSubmitted') {
+//     const score = event.data.score;
+//     db.collection('scores').add(scoreData);
+//     // db.collection('scores').add(score);
+//     renderLeaderboard();
+//   }
+// });
+
+// window.addEventListener('message', event => {
+//   if (event.data.type === 'scoreSubmitted') {
+//     const scoreData = {
+//       name: "player",
+//       score: Math.round(event.data.score)
+//     };
+//     db.collection('scores').add(scoreData);
+//     renderLeaderboard();
+//   }
+// });
+
+window.addEventListener('message', event => {
+  if (event.data.type === 'scoreSubmitted') {
+    let name;
+    if (firebase.auth().currentUser) {
+      name = firebase.auth().currentUser.displayName;
+      console.log(name);
+    }
+    if (name == null) {
+      name = "Anonymous";
+    }
+    const scoreData = {
+      name: name,
+      score: Math.round(event.data.score)
+    };
+    db.collection('scores').add(scoreData);
+    renderLeaderboard();
+  }
+});
 
 export { auth, db };

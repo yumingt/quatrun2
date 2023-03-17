@@ -17,6 +17,7 @@ iframe {
   height: 100%;
   border: none;
   display: block;
+  margin-bottom: 0%;
 }
 
 h1 {
@@ -46,4 +47,12 @@ button:hover {
 
 #page-container {
   height: 100%;
+  display: inline-block;
+  width: 70%;
+}
+
+#leaderboard-container {
+  display: inline-block;
+  width: 25%;
+  vertical-align: top;
 }
